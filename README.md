@@ -49,7 +49,7 @@ CREATE TABLE `kategori` (
 php -S localhost:8000
 
 # Or with Apache (needs mod_rewrite)
-# Put in Apache htdocs and access http://localhost/simple_api/
+# Put in Apache htdocs and access http://localhost/simple-rest-api/
 ```
 
 ## Test Endpoints (curl examples)
@@ -93,4 +93,4 @@ curl -X DELETE http://localhost:8000/kategori/1
 ✅ **PDO prepared statements** (SQL injection safe)  
 ✅ **Clean URLs** (.htaccess)
 
-**Status:** Ready to test! 🚀
+
