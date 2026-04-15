@@ -1,0 +1,23 @@
+# Apache .htaccess for RESTful PHP API
+# Rewrite all requests to index.php
+
+RewriteEngine On
+
+# Handle Authorization HEADER
+RewriteCond %{HTTP:Authorization} ^(.*)
+RewriteRule .* - [e=HTTP_AUTHORIZATION:%1]
+
+# Handle all requests to index.php except existing files
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ index.php [QSA,L]
+
+# PHP Configuration
+php_flag display_errors Off
+php_flag log_errors On
+php_value error_log /path/to/your/error.log
+
+# Security headers
+Header always set X-Content-Type-Options nosniff
+Header always set X-Frame-Options DENY
+Header always set X-XSS-Protection "1; mode=block"

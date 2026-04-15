@@ -1,6 +1,6 @@
-# RESTful PHP API - Kategori CRUD
+# Simple RESTful PHP API
 
-Native PHP OOP implementation of RESTful API with full CRUD operations for **kategori** table.
+Native PHP OOP implementation of RESTful API with full CRUD operations.
 
 ## Database Setup
 
