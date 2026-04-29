@@ -9,7 +9,7 @@ class Database {
     private $connection;
     
     private $host = 'localhost';
-    private $dbname = 'mydb';
+    private $dbname = 'vigenesia';
     private $username = 'root';
     private $password = 'P@ssword';
     
