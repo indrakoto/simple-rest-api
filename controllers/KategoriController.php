@@ -11,6 +11,24 @@ class KategoriController {
     public function __construct() {
         $this->kategori = new Kategori();
     }
+
+    private function getInputData() {
+        $input = json_decode(file_get_contents('php://input'), true);
+        if (is_array($input)) {
+            return $input;
+        }
+
+        if (!empty($_POST)) {
+            return $_POST;
+        }
+
+        parse_str(file_get_contents('php://input'), $parsedInput);
+        if (is_array($parsedInput) && !empty($parsedInput)) {
+            return $parsedInput;
+        }
+
+        return [];
+    }
     
     public function getAll() {
         $result = $this->kategori->getAll();
@@ -31,14 +49,14 @@ class KategoriController {
     
     public function create() {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $input = json_decode(file_get_contents('php://input'), true);
-            if (!isset($input['nama_kategori']) || empty(trim($input['nama_kategori']))) {
+            $input = $this->getInputData();
+            if (!isset($input['nama_kategori']) || empty(trim((string) $input['nama_kategori']))) {
                 http_response_code(400);
                 echo json_encode(['status' => 'error', 'message' => 'nama_kategori is required'], JSON_PRETTY_PRINT);
                 return;
             }
             
-            if ($this->kategori->create(['nama_kategori' => trim($input['nama_kategori'])])) {
+            if ($this->kategori->create(['nama_kategori' => trim((string) $input['nama_kategori'])])) {
                 http_response_code(201);
                 echo json_encode(['status' => 'success', 'message' => 'Kategori created successfully'], JSON_PRETTY_PRINT);
             } else {
@@ -50,14 +68,14 @@ class KategoriController {
     
     public function update($id) {
         if ($_SERVER['REQUEST_METHOD'] === 'PUT') {
-            $input = json_decode(file_get_contents('php://input'), true);
-            if (!isset($input['nama_kategori']) || empty(trim($input['nama_kategori']))) {
+            $input = $this->getInputData();
+            if (!isset($input['nama_kategori']) || empty(trim((string) $input['nama_kategori']))) {
                 http_response_code(400);
                 echo json_encode(['status' => 'error', 'message' => 'nama_kategori is required'], JSON_PRETTY_PRINT);
                 return;
             }
             
-            if ($this->kategori->update($id, ['nama_kategori' => trim($input['nama_kategori'])])) {
+            if ($this->kategori->update($id, ['nama_kategori' => trim((string) $input['nama_kategori'])])) {
                 http_response_code(200);
                 echo json_encode(['status' => 'success', 'message' => 'Kategori updated successfully'], JSON_PRETTY_PRINT);
             } else {
