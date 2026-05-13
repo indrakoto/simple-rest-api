@@ -118,7 +118,16 @@ try {
             break;
 
         case 'users':
-            if ($id === null) {
+            // 1. Cek dulu apakah ini request khusus untuk login
+            if ($id === 'login') {
+                if ($requestMethod === 'POST') {
+                    $usersController->login();
+                } else {
+                    http_response_code(405);
+                    echo json_encode(['status' => 'error', 'message' => 'Method not allowed. Gunakan POST untuk login'], JSON_PRETTY_PRINT);
+                }
+            }
+            else if ($id === null) {
                 if ($requestMethod === 'GET') {
                     $usersController->getAll();
                 } elseif ($requestMethod === 'POST') {

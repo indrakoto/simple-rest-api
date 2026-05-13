@@ -90,5 +90,32 @@ class Users {
         $stmt->bindParam(':id', $id);
         return $stmt->execute();
     }
+
+
+    /**
+     * Cari user berdasarkan email untuk keperluan login
+     */
+    public function getByEmailx($email) {
+        $query = "SELECT u.id, u.nama, u.username, u.email, u.password, u.role_id, u.is_active, r.role 
+                  FROM " . $this->table . " u
+                  LEFT JOIN role r ON u.role_id = r.id
+                  WHERE u.email = :email LIMIT 1";
+                  
+        $query_x = "SELECT id, nama, username, email, password, role_id, is_active 
+                  FROM " . $this->table . " 
+                  WHERE email = :email LIMIT 1";
+
+        $stmt = $this->db->prepare($query_x);
+        $stmt->bindParam(':email', $email);
+        $stmt->execute();
+        
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+    public function getByEmail($email) {
+        $query = "SELECT * FROM users LIMIT 1"; // Ambil user apa saja yang ada
+        $stmt = $this->db->prepare($query);
+        $stmt->execute();
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
 }
 ?>

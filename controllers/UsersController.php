@@ -146,5 +146,57 @@ class UsersController {
             }
         }
     }
+
+    public function login() {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            
+
+            // Mendukung input JSON maupun POST Form
+            $input = json_decode(file_get_contents('php://input'), true);
+            if (!$input) {
+                $input = $_POST;
+            }
+
+            $email = isset($input['email']) ? trim($input['email']) : '';
+            $password = isset($input['password']) ? $input['password'] : '';
+
+            if (empty($email) || empty($password)) {
+                http_response_code(400);
+                echo json_encode(['status' => 'error', 'message' => 'Email and password are required'], JSON_PRETTY_PRINT);
+                return;
+            }
+
+            // Cari user berdasarkan email melalui model
+            $user = $this->users->getByEmail($email);
+            // DEBUG: Tambahkan ini untuk melihat perbandingan
+            //var_dump($password); // Password dari Postman
+            //var_dump($user['password']); // Hash dari Database
+            //var_dump(password_verify($password, $user['password'])); // Hasilnya true atau false?
+            //die();
+
+            if ($user && password_verify($password, $user['password'])) {
+                // Cek apakah user aktif
+                if ($user['is_active'] == 0) {
+                    http_response_code(403);
+                    echo json_encode(['status' => 'error', 'message' => 'Account is inactive'], JSON_PRETTY_PRINT);
+                    return;
+                }
+
+                // Hapus password dari response agar aman
+                unset($user['password']);
+
+                http_response_code(200);
+                echo json_encode([
+                    'status' => 'success',
+                    'message' => 'Login successful',
+                    'data' => $user
+                ], JSON_PRETTY_PRINT);
+            } else {
+                http_response_code(401);
+                echo json_encode(['status' => 'error', 'message' => 'Invalid email or password'], JSON_PRETTY_PRINT);
+            }
+        }
+    }
+
 }
 ?>
