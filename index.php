@@ -16,147 +16,94 @@ header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type');
 
-$requestMethod = $_SERVER['REQUEST_METHOD'];
-$requestUri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-$requestUri = trim($requestUri, '/');
-
-// Remove base path if any
-$basePath = '/simple_api'; // Adjust if needed
-if (strpos($requestUri, $basePath) === 0) {
-    $requestUri = substr($requestUri, strlen($basePath));
-}
-$requestUri = trim($requestUri, '/');
-
-if ($requestUri === '') {
-    header('Content-Type: text/html; charset=UTF-8');
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(200);
-    echo "<!DOCTYPE html>
-<html lang=\"id\">
-<head>
-    <meta charset=\"UTF-8\">
-    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">
-    <title>Halaman Webservice</title>
-</head>
-<body>
-    <h1>Selamat Datang di Halaman Webservice.</h1>
-</body>
-</html>";
     exit();
 }
 
-// API response content type
 header('Content-Type: application/json; charset=UTF-8');
 
-// Handle preflight OPTIONS request
-if ($requestMethod === 'OPTIONS') {
-    http_response_code(200);
+// Ambil URI
+$uri = trim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/');
+
+// Detect base path automatically
+$scriptName = dirname($_SERVER['SCRIPT_NAME']); // e.g. /simple_api
+$scriptName = trim($scriptName, '/');           // simple_api
+
+if ($scriptName !== '') {
+    if (strpos($uri, $scriptName) === 0) {
+        $uri = substr($uri, strlen($scriptName));
+    }
+}
+
+$uri = trim($uri, '/');
+
+// Jika root → tampilkan halaman HTML
+if ($uri === '') {
+    header('Content-Type: text/html; charset=UTF-8');
+    echo "<h1>Selamat Datang di Halaman Webservice.</h1>";
     exit();
 }
 
-require_once __DIR__ . '/controllers/KategoriController.php';
-require_once __DIR__ . '/controllers/RoleController.php';
-require_once __DIR__ . '/controllers/UsersController.php';
+// Pecah URI
+$parts = explode('/', $uri);
+$resource = $parts[0] ?? null;
+$id = $parts[1] ?? null;
 
-$kategoriController = new KategoriController();
-$roleController = new RoleController();
-$usersController = new UsersController();
+// Nama controller otomatis
+$controllerName = ucfirst($resource) . 'Controller';
+$controllerFile = __DIR__ . "/controllers/$controllerName.php";
 
-$pathParts = explode('/', $requestUri);
-$resource = $pathParts[0] ?? '';
-$id = $pathParts[1] ?? null;
+// Cek controller
+if (!file_exists($controllerFile)) {
+    http_response_code(404);
+    echo json_encode(['error' => 'Resource not found']);
+    exit();
+}
 
-try {
-    switch ($resource) {
-        case 'kategori':
-            if ($id === null) {
-                // /kategori
-                if ($requestMethod === 'GET') {
-                    $kategoriController->getAll();
-                } elseif ($requestMethod === 'POST') {
-                    $kategoriController->create();
-                } else {
-                    http_response_code(405);
-                    echo json_encode(['status' => 'error', 'message' => 'Method not allowed'], JSON_PRETTY_PRINT);
-                }
-            } else {
-                // /kategori/{id}
-                if ($requestMethod === 'GET') {
-                    $kategoriController->getById($id);
-                } elseif ($requestMethod === 'PUT') {
-                    $kategoriController->update($id);
-                } elseif ($requestMethod === 'DELETE') {
-                    $kategoriController->delete($id);
-                } else {
-                    http_response_code(405);
-                    echo json_encode(['status' => 'error', 'message' => 'Method not allowed'], JSON_PRETTY_PRINT);
-                }
-            }
-            break;
+require_once $controllerFile;
+$controller = new $controllerName();
 
-        case 'role':
-            if ($id === null) {
-                if ($requestMethod === 'GET') {
-                    $roleController->getAll();
-                } elseif ($requestMethod === 'POST') {
-                    $roleController->create();
-                } else {
-                    http_response_code(405);
-                    echo json_encode(['status' => 'error', 'message' => 'Method not allowed'], JSON_PRETTY_PRINT);
-                }
-            } else {
-                if ($requestMethod === 'GET') {
-                    $roleController->getById($id);
-                } elseif ($requestMethod === 'PUT') {
-                    $roleController->update($id);
-                } elseif ($requestMethod === 'DELETE') {
-                    $roleController->delete($id);
-                } else {
-                    http_response_code(405);
-                    echo json_encode(['status' => 'error', 'message' => 'Method not allowed'], JSON_PRETTY_PRINT);
-                }
-            }
-            break;
+// Mapping HTTP method → method controller
+$methodMap = [
+    'GET'    => $id ? 'show' : 'index',
+    'POST'   => 'store',
+    'PUT'    => 'update',
+    'DELETE' => 'destroy'
+];
 
-        case 'users':
-            // 1. Cek dulu apakah ini request khusus untuk login
-            if ($id === 'login') {
-                if ($requestMethod === 'POST') {
-                    $usersController->login();
-                } else {
-                    http_response_code(405);
-                    echo json_encode(['status' => 'error', 'message' => 'Method not allowed. Gunakan POST untuk login'], JSON_PRETTY_PRINT);
-                }
-            }
-            else if ($id === null) {
-                if ($requestMethod === 'GET') {
-                    $usersController->getAll();
-                } elseif ($requestMethod === 'POST') {
-                    $usersController->create();
-                } else {
-                    http_response_code(405);
-                    echo json_encode(['status' => 'error', 'message' => 'Method not allowed'], JSON_PRETTY_PRINT);
-                }
-            } else {
-                if ($requestMethod === 'GET') {
-                    $usersController->getById($id);
-                } elseif ($requestMethod === 'PUT') {
-                    $usersController->update($id);
-                } elseif ($requestMethod === 'DELETE') {
-                    $usersController->delete($id);
-                } else {
-                    http_response_code(405);
-                    echo json_encode(['status' => 'error', 'message' => 'Method not allowed'], JSON_PRETTY_PRINT);
-                }
-            }
-            break;
-
-        default:
-            http_response_code(404);
-            echo json_encode(['status' => 'error', 'message' => 'Endpoint not found'], JSON_PRETTY_PRINT);
-            break;
+// Endpoint khusus (misalnya /users/login)
+if ($resource === 'users' && $id === 'login') {
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        $controller->login();
+        exit();
     }
+    http_response_code(405);
+    echo json_encode(['error' => 'Use POST for login']);
+    exit();
+}
+
+// Cek method
+$httpMethod = $_SERVER['REQUEST_METHOD'];
+if (!isset($methodMap[$httpMethod])) {
+    http_response_code(405);
+    echo json_encode(['error' => 'Method not allowed']);
+    exit();
+}
+
+$method = $methodMap[$httpMethod];
+
+// Cek apakah method ada di controller
+if (!method_exists($controller, $method)) {
+    http_response_code(405);
+    echo json_encode(['error' => 'Method not implemented']);
+    exit();
+}
+
+// Jalankan method
+try {
+    $id ? $controller->$method($id) : $controller->$method();
 } catch (Exception $e) {
     http_response_code(500);
-    echo json_encode(['status' => 'error', 'message' => $e->getMessage()], JSON_PRETTY_PRINT);
+    echo json_encode(['error' => $e->getMessage()]);
 }
-?>
