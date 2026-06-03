@@ -48,3 +48,11 @@ CREATE TABLE notes (
 );
 
 
+INSERT INTO `role` (`id`, `role`) VALUES
+(1, 'admin'),
+(2, 'staff'),
+(3, 'member');
+
+INSERT INTO `users` (`id`, `nama`, `username`, `email`, `password`, `role_id`, `is_active`, `created_at`, `updated_at`) VALUES
+(1, 'Administrator', 'admin', 'indra@bsi.ac.id', '$2y$10$WEDdl2bDkHjaPsBc2irPYuu0QKCGZrq7d2l2Ge0ovYTalKUHQ7B2O', 1, 1, '2024-10-09', '2024-10-09'),
+(2, 'Zhafran', 'zhafran', 'zhafran@example.com', '$2y$10$VdMfXeS0C7CmKKQaLwJ4u.6hQasRWYsNKzvLRCrarwF9uNLwcqfzi', 3, 1, '2026-04-29', '2026-04-29');
