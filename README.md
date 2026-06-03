@@ -1,23 +1,27 @@
 # Simple RESTful PHP API
 
-Native PHP OOP implementation of RESTful API with full CRUD operations.
+Aplikasi RESTful API menggunakan Native PHP (OOP).
+Merupakan aplikasi sederhana untuk pembelajaran bagi mahasiswa mata kuliah Teknologi Webservice di Universitas Bina Sarana Informatika.
+Mahasiswa dapat mempelajari semua sumber kode ini untuk dapat memahami tentang metode REST seperti GET, POST, PUT, DELETE dan sebagainya.
 
 ## Database Setup
 
 ```sql
-CREATE DATABASE mydb;
-USE mydb;
+CREATE DATABASE news_db;
+USE news_db;
 
 CREATE TABLE `kategori` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `nama_kategori` varchar(100) DEFAULT NULL,
   PRIMARY KEY (`id`)
 );
+
+-- dan seterusnya, dapat dilihat secara lengkap pada folder database/schema.sql
 ```
 
 **Database Credentials (config/Database.php):**
 - Host: localhost
-- Database: `mydb`
+- Database: `news_db`
 - User: `root`
 - Password: `P@ssword`
 
@@ -25,14 +29,15 @@ CREATE TABLE `kategori` (
 ```
 ├── config/Database.php          # PDO Singleton connection
 ├── models/Kategori.php          # OOP Model (CRUD methods)
+├── controllers/BeritaController.php # REST Controller
 ├── controllers/KategoriController.php # REST Controller
+├── controllers/NotesController.php # REST Controller
 ├── index.php                    # API Router
 ├── .htaccess                    # Clean URLs
-├── TODO.md                      # Progress tracker
 └── README.md                    # This file
 ```
 
-## API Endpoints
+## Contoh API Endpoints Kategori
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
